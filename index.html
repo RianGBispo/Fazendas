@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurador de Berçário - Fazendas</title>
+    <link rel="icon" href="logo.png">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">🐄</div>
+                <div class="header-text">
+                    <h1>Configurador de Berçário</h1>
+                    <div class="subtitle">Sistema de Criação para Fazendas</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="alert">
+            <div class="alert-title">
+                <span>📋</span>
+                <span>Formato de Coordenadas</span>
+            </div>
+            <p>• Exemplo: <code>{-1672.8402, -1514.9821, 83.9110, 352.6875}</code></p>
+        </div>
+
+        <!-- Upload de Arquivo -->
+        <div class="section">
+            <h2 class="section-title">Carregar Configuração Existente</h2>
+            <div class="form-group">
+                <label for="fileInput">Fazer upload de um arquivo de configuração para preencher os campos
+                    automaticamente</label>
+                <input type="file" id="fileInput" accept=".txt,.lua" onchange="loadConfigFile(event)">
+                <div class="file-info" id="fileInfo"
+                    style="display: none; margin-top: 0.5rem; font-size: 0.875rem; color: var(--success);">
+                    ✅ Arquivo carregado com sucesso!
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuração Básica -->
+        <div class="section">
+            <h2 class="section-title">Configuração Básica</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nome da Organização</label>
+                    <input type="text" id="orgName" placeholder="fazenda_82">
+                </div>
+
+                <div class="form-group">
+                    <label>Label</label>
+                    <input type="text" id="configLabel" placeholder="fazenda_82">
+                </div>
+
+                <div class="form-group">
+                    <label>Tipo de Berçário</label>
+                    <select id="nurseryType" onchange="updateAnimalFields()">
+                        <option value="prata">Prata (2 animais)</option>
+                        <option value="ouro">Ouro (4 animais)</option>
+                        <option value="ultimate">Ultimate (7 animais)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- WorkTable -->
+        <div class="section">
+            <h2 class="section-title">WorkTable (Mesa de Trabalho)</h2>
+
+            <div class="form-group">
+                <label>Coordenadas WorkTable (vec3)</label>
+                <input type="text" id="workTableCoords" placeholder="{812.6935, 509.9003, 109.1277}">
+            </div>
+        </div>
+
+        <!-- Animais -->
+        <div class="section">
+            <h2 class="section-title">Posições dos Animais</h2>
+
+            <!-- Pig (Prata, Ouro, Ultimate) -->
+            <div class="animal-card" id="animal-pig">
+                <div class="animal-header">
+                    <span class="animal-icon">🐷</span>
+                    <span class="animal-name">Suíno (Pig)</span>
+                    <span class="tier-badge tier-prata">Prata+</span>
+                </div>
+                <div class="position-row">
+                    <div>
+                        <div class="position-label">Macho (Male)</div>
+                        <input type="text" id="pigMale" placeholder="{814.2149, 501.6235, 108.8012, 179.7935}">
+                    </div>
+                    <div>
+                        <div class="position-label">Fêmea (Female)</div>
+                        <input type="text" id="pigFemale" placeholder="{814.2739, 498.8531, 108.7313, 1.2583}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Goat (Prata, Ouro, Ultimate) -->
+            <div class="animal-card" id="animal-goat">
+                <div class="animal-header">
+                    <span class="animal-icon">🐐</span>
+                    <span class="animal-name">Caprino (Goat)</span>
+                    <span class="tier-badge tier-prata">Prata+</span>
+                </div>
+                <div class="position-row">
+                    <div>
+                        <div class="position-label">Macho (Male)</div>
+                        <input type="text" id="goatMale" placeholder="{809.6838, 497.1316, 108.6553, 167.4195}">
+                    </div>
+                    <div>
+                        <div class="position-label">Fêmea (Female)</div>
+                        <input type="text" id="goatFemale" placeholder="{808.8856, 493.8056, 108.6736, 350.0254}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sheep (Ouro, Ultimate) -->
+            <div class="animal-card" id="animal-sheep">
+                <div class="animal-header">
+                    <span class="animal-icon">🐑</span>
+                    <span class="animal-name">Ovino (Sheep)</span>
+                    <span class="tier-badge tier-ouro">Ouro+</span>
+                </div>
+                <div class="position-row">
+                    <div>
+                        <div class="position-label">Macho (Male)</div>
+                        <input type="text" id="sheepMale" placeholder="{806.1161, 493.4849, 108.7004, 184.1186}">
+                    </div>
+                    <div>
+                        <div class="position-label">Fêmea (Female)</div>
+                        <input type="text" id="sheepFemale" placeholder="{806.4432, 490.6535, 108.7925, 357.7847}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Donkey (Ouro, Ultimate) -->
+            <div class="animal-card" id="animal-donkey">
+                <div class="animal-header">
+                    <span class="animal-icon">🫏</span>
+                    <span class="animal-name">Asneiro (Donkey)</span>
+                    <span class="tier-badge tier-ouro">Ouro+</span>
+                </div>
+                <div class="position-row">
+                    <div>
+                        <div class="position-label">Macho (Male)</div>
+                        <input type="text" id="donkeyMale" placeholder="{803.8860, 490.5619, 108.8156, 187.4156}">
+                    </div>
+                    <div>
+                        <div class="position-label">Fêmea (Female)</div>
+                        <input type="text" id="donkeyFemale" placeholder="{804.5624, 486.4403, 109.0041, 9.4218}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cow (Ultimate) -->
+            <div class="animal-card" id="animal-cow">
+                <div class="animal-header">
+                    <span class="animal-icon">🐄</span>
+                    <span class="animal-name">Bovino (Cow)</span>
+                    <span class="tier-badge tier-ultimate">Ultimate</span>
+                </div>
+                <div class="position-row">
+                    <div>
+                        <div class="position-label">Macho (Male)</div>
+                        <input type="text" id="cowMale" placeholder="{-1672.0221, -1508.2505, 83.9063, 168.7667}">
+                    </div>
+                    <div>
+                        <div class="position-label">Fêmea (Female)</div>
+                        <input type="text" id="cowFemale" placeholder="{-1672.8402, -1514.9821, 83.9110, 352.6875}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chicken (Ultimate) -->
+            <div class="animal-card" id="animal-chicken">
+                <div class="animal-header">
+                    <span class="animal-icon">🐔</span>
+                    <span class="animal-name">Aviário (Chicken)</span>
+                    <span class="tier-badge tier-ultimate">Ultimate</span>
+                </div>
+                <div class="position-row">
+                    <div>
+                        <div class="position-label">Macho (Male)</div>
+                        <input type="text" id="chickenMale" placeholder="{-1691.6953, -1510.7426, 84.6224, 182.5494}">
+                    </div>
+                    <div>
+                        <div class="position-label">Fêmea (Female)</div>
+                        <input type="text" id="chickenFemale" placeholder="{-1691.6318, -1514.0101, 84.6924, 1.0473}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buffalo (Ultimate) -->
+            <div class="animal-card" id="animal-buffalo">
+                <div class="animal-header">
+                    <span class="animal-icon">🦬</span>
+                    <span class="animal-name">Bufalino (Buffalo)</span>
+                    <span class="tier-badge tier-ultimate">Ultimate</span>
+                </div>
+                <div class="position-row">
+                    <div>
+                        <div class="position-label">Macho (Male)</div>
+                        <input type="text" id="buffaloMale" placeholder="{-1694.4453, -1522.7205, 84.7552, 285.8687}">
+                    </div>
+                    <div>
+                        <div class="position-label">Fêmea (Female)</div>
+                        <input type="text" id="buffaloFemale" placeholder="{-1677.7565, -1522.7400, 84.0723, 90.3084}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="buttons">
+            <button class="btn-primary" onclick="generateConfig()">
+                <span>Gerar Configuração</span>
+            </button>
+            <button class="btn-secondary" id="downloadBtn" onclick="downloadConfig()" disabled>
+                <span>Baixar Arquivo</span>
+            </button>
+        </div>
+    </div>
+
+    <footer>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
+            <span>Configurador de Berçário v1.0</span>
+            <span>•</span>
+            <span>Desenvolvido por <strong>Rian Bispo</strong></span>
+            <span>•</span>
+            <a href="https://github.com/RianGBispo" target="_blank">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="index.js"></script>
+</body>
+
+</html>
