@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurador de Organização - Fazendas</title>
+    <link rel="icon" href="logo.png">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">🐄</div>
+                <div class="header-text">
+                    <h1>Configurador de Fazendas</h1>
+                    <div class="subtitle">Sistema de Gerenciamento</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item">
+                    <span class="nav-icon">🐣</span>
+                    <span class="nav-text">Berçário</span>
+                </a>
+                <a href="organization.html" class="nav-item active">
+                    <span class="nav-icon">🏢</span>
+                    <span class="nav-text">Organização</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <div class="main-content">
+            <div class="container">
+                <div class="alert">
+                    <div class="alert-title">
+                        <span>📋</span>
+                        <span>Formato de Coordenadas</span>
+                    </div>
+                    <p>• Exemplo vec3: <code>{20.7340, 869.0310, 211.1787}</code></p>
+                    <p>• Exemplo vec4: <code>{22.8090, 876.3508, 211.7367, 87.0887}</code></p>
+                </div>
+
+                <!-- Upload de Arquivo -->
+                <div class="section">
+                    <h2 class="section-title">Carregar Configuração Existente</h2>
+                    <div class="form-group">
+                        <label for="orgFileInput">Fazer upload de um arquivo de configuração para preencher os
+                            campos
+                            automaticamente</label>
+                        <input type="file" id="orgFileInput" accept=".txt,.lua" onchange="loadOrgConfigFile(event)">
+                        <div class="file-info" id="orgFileInfo"
+                            style="display: none; margin-top: 0.5rem; font-size: 0.875rem; color: var(--success);">
+                            ✅ Arquivo carregado com sucesso!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuração Básica -->
+                <div class="section">
+                    <h2 class="section-title">Configuração Básica</h2>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome da Fazenda</label>
+                            <input type="text" id="farmName" placeholder="fazenda_110">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Label</label>
+                            <input type="text" id="farmLabel" placeholder="fazenda_110">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>PointCenter (vec3)</label>
+                        <input type="text" id="pointCenter" placeholder="{20.7340, 869.0310, 211.1787}">
+                    </div>
+                </div>
+
+                <!-- WorkTable -->
+                <div class="section">
+                    <h2 class="section-title">WorkTable (Mesa de Trabalho)</h2>
+
+                    <div class="form-group">
+                        <label>Coordenadas Spawn (vec3)</label>
+                        <input type="text" id="workTableSpawnCoords" placeholder="{20.7340, 869.0310, 211.1787}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>GetServiceCoords (vec3)</label>
+                        <input type="text" id="workTableServiceCoords" placeholder="{20.7340, 869.0310, 211.1787}">
+                    </div>
+                </div>
+
+                <!-- Animais -->
+                <div class="section">
+                    <h2 class="section-title">Animais - SpawnPoints</h2>
+
+                    <!-- Cow -->
+                    <div class="animal-card">
+                        <div class="animal-header">
+                            <span class="animal-icon">🐄</span>
+                            <span class="animal-name">Bovino (Cow) - Max: 4</span>
+                        </div>
+                        <div class="spawn-points">
+                            <div class="form-group">
+                                <label>SpawnPoint 1 (vec4)</label>
+                                <input type="text" id="cowSpawn1"
+                                    placeholder="{22.8090, 876.3508, 211.7367, 87.0887}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 2 (vec4)</label>
+                                <input type="text" id="cowSpawn2"
+                                    placeholder="{21.3033, 877.1100, 211.6618, 67.4679}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 3 (vec4)</label>
+                                <input type="text" id="cowSpawn3"
+                                    placeholder="{19.7608, 877.7498, 211.5871, 67.4679}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 4 (vec4)</label>
+                                <input type="text" id="cowSpawn4"
+                                    placeholder="{18.2394, 878.4767, 211.5083, 64.2654}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pig -->
+                    <div class="animal-card">
+                        <div class="animal-header">
+                            <span class="animal-icon">🐷</span>
+                            <span class="animal-name">Suíno (Pig) - Max: 4</span>
+                        </div>
+                        <div class="spawn-points">
+                            <div class="form-group">
+                                <label>SpawnPoint 1 (vec4)</label>
+                                <input type="text" id="pigSpawn1"
+                                    placeholder="{16.0976, 879.5164, 211.4106, 64.0929}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 2 (vec4)</label>
+                                <input type="text" id="pigSpawn2"
+                                    placeholder="{14.6353, 880.2314, 211.3398, 63.9398}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 3 (vec4)</label>
+                                <input type="text" id="pigSpawn3"
+                                    placeholder="{13.0514, 880.9948, 211.2464, 64.3189}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 4 (vec4)</label>
+                                <input type="text" id="pigSpawn4"
+                                    placeholder="{11.4771, 881.7517, 211.1501, 64.3189}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Buffalo -->
+                    <div class="animal-card">
+                        <div class="animal-header">
+                            <span class="animal-icon">🦬</span>
+                            <span class="animal-name">Bufalino (Buffalo) - Max: 4</span>
+                        </div>
+                        <div class="spawn-points">
+                            <div class="form-group">
+                                <label>SpawnPoint 1 (vec4)</label>
+                                <input type="text" id="buffaloSpawn1"
+                                    placeholder="{24.4539, 882.7986, 211.6238, 349.0357}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 2 (vec4)</label>
+                                <input type="text" id="buffaloSpawn2"
+                                    placeholder="{24.9751, 884.4278, 211.5900, 345.0944}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 3 (vec4)</label>
+                                <input type="text" id="buffaloSpawn3"
+                                    placeholder="{25.4271, 886.1266, 211.5681, 345.0944}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 4 (vec4)</label>
+                                <input type="text" id="buffaloSpawn4"
+                                    placeholder="{25.8757, 887.8128, 211.5499, 345.0944}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chicken -->
+                    <div class="animal-card">
+                        <div class="animal-header">
+                            <span class="animal-icon">🐔</span>
+                            <span class="animal-name">Aviário (Chicken) - Max: 4</span>
+                        </div>
+                        <div class="spawn-points">
+                            <div class="form-group">
+                                <label>SpawnPoint 1 (vec4)</label>
+                                <input type="text" id="chickenSpawn1"
+                                    placeholder="{17.1122, 875.5524, 211.3716, 62.5069}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 2 (vec4)</label>
+                                <input type="text" id="chickenSpawn2"
+                                    placeholder="{15.5904, 876.3535, 211.3193, 63.7480}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 3 (vec4)</label>
+                                <input type="text" id="chickenSpawn3"
+                                    placeholder="{14.1274, 877.2032, 211.2851, 59.6401}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 4 (vec4)</label>
+                                <input type="text" id="chickenSpawn4"
+                                    placeholder="{12.6088, 877.9974, 211.2092, 65.2100}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sheep -->
+                    <div class="animal-card">
+                        <div class="animal-header">
+                            <span class="animal-icon">🐑</span>
+                            <span class="animal-name">Ovino (Sheep) - Max: 4</span>
+                        </div>
+                        <div class="spawn-points">
+                            <div class="form-group">
+                                <label>SpawnPoint 1 (vec4)</label>
+                                <input type="text" id="sheepSpawn1"
+                                    placeholder="{10.3308, 879.0497, 211.0689, 69.6064}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 2 (vec4)</label>
+                                <input type="text" id="sheepSpawn2"
+                                    placeholder="{8.8245, 879.8654, 210.9608, 63.2902}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 3 (vec4)</label>
+                                <input type="text" id="sheepSpawn3"
+                                    placeholder="{7.3209, 880.6454, 210.8219, 62.5440}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 4 (vec4)</label>
+                                <input type="text" id="sheepSpawn4"
+                                    placeholder="{5.9284, 881.4263, 210.7479, 63.0240}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Goat -->
+                    <div class="animal-card">
+                        <div class="animal-header">
+                            <span class="animal-icon">🐐</span>
+                            <span class="animal-name">Caprino (Goat) - Max: 4</span>
+                        </div>
+                        <div class="spawn-points">
+                            <div class="form-group">
+                                <label>SpawnPoint 1 (vec4)</label>
+                                <input type="text" id="goatSpawn1"
+                                    placeholder="{4.2554, 878.4532, 210.4580, 240.8101}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 2 (vec4)</label>
+                                <input type="text" id="goatSpawn2"
+                                    placeholder="{5.7031, 877.5779, 210.4940, 238.5901}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 3 (vec4)</label>
+                                <input type="text" id="goatSpawn3"
+                                    placeholder="{7.1980, 876.6757, 210.5869, 238.8899}">
+                            </div>
+                            <div class="form-group">
+                                <label>SpawnPoint 4 (vec4)</label>
+                                <input type="text" id="goatSpawn4"
+                                    placeholder="{8.6157, 875.8057, 210.7216, 238.4489}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Donkey (apenas 1 SpawnPoint) -->
+                    <div class="animal-card">
+                        <div class="animal-header">
+                            <span class="animal-icon">🫏</span>
+                            <span class="animal-name">Asneiro (Donkey) - Max: 1</span>
+                        </div>
+                        <div class="spawn-points">
+                            <div class="form-group">
+                                <label>SpawnPoint 1 (vec4)</label>
+                                <input type="text" id="donkeySpawn1"
+                                    placeholder="{26.6457, 876.3257, 211.7503, 92.4354}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões -->
+                <div class="buttons">
+                    <button class="btn-primary" onclick="generateOrgConfig()">
+                        <span>Gerar Configuração</span>
+                    </button>
+                    <button class="btn-secondary" id="orgDownloadBtn" onclick="downloadOrgConfig()" disabled>
+                        <span>Baixar Arquivo</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
+            <span>Configurador de Organização v1.0</span>
+            <span>•</span>
+            <span>Desenvolvido por <strong>Rian Bispo</strong></span>
+            <span>•</span>
+            <a href="https://github.com/RianGBispo" target="_blank">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="index.js"></script>
+</body>
+
+</html>
+

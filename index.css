@@ -219,6 +219,8 @@ h1 {
 
 .form-group {
     margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
 }
 
 label {
@@ -243,6 +245,8 @@ input[type="file"] {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.875rem;
     transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
 }
 
 input[type="file"] {
@@ -330,6 +334,8 @@ input[type="text"]::placeholder {
     background: linear-gradient(135deg, rgba(88, 166, 255, 0.1) 0%, rgba(188, 140, 255, 0.1) 100%);
     opacity: 0;
     transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 0;
 }
 
 .animal-card:hover::before {
@@ -596,7 +602,180 @@ footer a:hover::after {
     }
 }
 
+/* Sidebar e Layout Principal */
+.main-layout {
+    display: flex;
+    min-height: calc(100vh - 200px);
+    position: relative;
+    z-index: 1;
+}
+
+.sidebar {
+    width: 280px;
+    background: rgba(22, 27, 34, 0.8);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(88, 166, 255, 0.2);
+    padding: 2rem 0;
+    position: sticky;
+    top: 80px;
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0 1rem;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--accent-gradient);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.nav-item:hover {
+    background: rgba(88, 166, 255, 0.1);
+    color: var(--text-primary);
+    transform: translateX(4px);
+}
+
+.nav-item.active {
+    background: rgba(88, 166, 255, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(88, 166, 255, 0.3);
+}
+
+.nav-item.active::before {
+    transform: scaleY(1);
+}
+
+/* Destacar link ativo baseado na URL */
+.nav-item[href="index.html"]:not([href*="organization"]),
+.nav-item[href="./index.html"]:not([href*="organization"]),
+.nav-item[href="/"]:not([href*="organization"]) {
+    /* Será destacado se estiver na página index.html */
+}
+
+.nav-item[href*="organization"] {
+    /* Será destacado se estiver na página organization.html */
+}
+
+.nav-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.nav-text {
+    font-size: 1rem;
+}
+
+.main-content {
+    flex: 1;
+    position: relative;
+}
+
+.page {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.page.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Spawn Points */
+.spawn-points {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+input[type="number"] {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    background: rgba(33, 38, 45, 0.8);
+    border: 2px solid rgba(88, 166, 255, 0.2);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.2), var(--shadow-md);
+    background: rgba(33, 38, 45, 1);
+}
+
 @media (max-width: 768px) {
+    .main-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        position: relative;
+        top: 0;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid rgba(88, 166, 255, 0.2);
+    }
+
+    .sidebar-nav {
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 1rem;
+    }
+
+    .nav-item {
+        white-space: nowrap;
+        min-width: fit-content;
+    }
+
+    .spawn-points {
+        grid-template-columns: 1fr;
+    }
+
     .header-content {
         padding: 0 1rem;
     }
