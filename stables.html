@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurador de Estábulo - Fazendas</title>
+    <link rel="icon" href="logo.png">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">🐄</div>
+                <div class="header-text">
+                    <h1>Configurador de Fazendas</h1>
+                    <div class="subtitle">Sistema de Gerenciamento</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item">
+                    <span class="nav-icon">🐣</span>
+                    <span class="nav-text">Berçário</span>
+                </a>
+                <a href="organization.html" class="nav-item">
+                    <span class="nav-icon">🏢</span>
+                    <span class="nav-text">Organização</span>
+                </a>
+                <a href="stables.html" class="nav-item active">
+                    <span class="nav-icon">🐴</span>
+                    <span class="nav-text">Estábulo</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <div class="main-content">
+            <div class="container">
+                <div class="alert">
+                    <div class="alert-title">
+                        <span>📋</span>
+                        <span>Formato de Coordenadas</span>
+                    </div>
+                    <p>• Exemplo vec3: <code>{20.7340, 869.0310, 211.1787}</code></p>
+                    <p>• Exemplo vec4: <code>{22.8090, 876.3508, 211.7367, 87.0887}</code></p>
+                </div>
+
+                <!-- Upload de Arquivo -->
+                <div class="section">
+                    <h2 class="section-title">Carregar Configuração Existente</h2>
+                    <div class="form-group">
+                        <label for="stableFileInput">Fazer upload de um arquivo de configuração para preencher os
+                            campos
+                            automaticamente</label>
+                        <input type="file" id="stableFileInput" accept=".txt,.lua"
+                            onchange="loadStableConfigFile(event)">
+                        <div class="file-info" id="stableFileInfo"
+                            style="display: none; margin-top: 0.5rem; font-size: 0.875rem; color: var(--success);">
+                            ✅ Arquivo carregado com sucesso!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações Básicas -->
+                <div class="section">
+                    <h2 class="section-title">Informações do Estábulo</h2>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>ID (Único)</label>
+                            <input type="text" id="stableId" placeholder="annesburg">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nome Visual (Visualização)</label>
+                            <input type="text" id="stableName" placeholder="Treinamento Annesburg">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Location (NPC Spawn - vec4)</label>
+                        <input type="text" id="stableLocation" placeholder="{2991.6831, 1441.0128, 45.6146, 71.0331}">
+                    </div>
+                </div>
+
+                <!-- Visualização e Equipamentos -->
+                <div class="section">
+                    <h2 class="section-title">Visualização e Equipamentos</h2>
+
+                    <div class="form-group">
+                        <label>Preview Horse (Visualizar Novo Cavalo - vec4)</label>
+                        <input type="text" id="previewHorse" placeholder="{2986.5974, 1444.3022, 45.5902, 272.6790}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Preview My Horse (Visualizar Seu Cavalo - vec4)</label>
+                        <input type="text" id="previewMyHorse" placeholder="{2986.5974, 1444.3022, 45.5902, 272.6790}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Equip My Horse (Colocar Itens - vec4)</label>
+                        <input type="text" id="equipMyHorse" placeholder="{2986.5974, 1444.3022, 45.5902, 272.6790}">
+                    </div>
+                </div>
+
+                <!-- Carroças -->
+                <div class="section">
+                    <h2 class="section-title">Carroças</h2>
+
+                    <div class="form-group">
+                        <label>Preview Wagon (Visualizar Carroça - vec4)</label>
+                        <input type="text" id="previewWagon" placeholder="{2988.9543, 1451.0927, 45.5296, 256.7340}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Spawn Wagon (Spawnar Carroça - vec4)</label>
+                        <input type="text" id="spawnWagon" placeholder="{2988.9543, 1451.0927, 45.5296, 256.7340}">
+                    </div>
+                </div>
+
+                <!-- Loja -->
+                <div class="section">
+                    <h2 class="section-title">Loja e Interior</h2>
+
+                    <div class="form-group">
+                        <label>Store Saddle (Loja de Selas - vec4)</label>
+                        <input type="text" id="storeSaddle" placeholder="{2991.7576, 1445.6282, 45.6108, 139.3048}">
+                    </div>
+
+                    <h3 style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 1rem;">Área Interna do
+                        Estábulo (Inside Polyzone)</h3>
+                    <div class="spawn-points">
+                        <div class="form-group">
+                            <label>Ponto 1 (vec3)</label>
+                            <input type="text" id="insideStable1" placeholder="{2995.8894, 1445.4722, 46.0960}">
+                        </div>
+                        <div class="form-group">
+                            <label>Ponto 2 (vec3)</label>
+                            <input type="text" id="insideStable2" placeholder="{2991.1577, 1440.1729, 45.6327}">
+                        </div>
+                        <div class="form-group">
+                            <label>Ponto 3 (vec3)</label>
+                            <input type="text" id="insideStable3" placeholder="{2987.5002, 1441.5181, 45.5903}">
+                        </div>
+                        <div class="form-group">
+                            <label>Ponto 4 (vec3)</label>
+                            <input type="text" id="insideStable4" placeholder="{2991.7734, 1446.5031, 45.6282}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zona de Treinamento -->
+                <div class="section">
+                    <h2 class="section-title">Zona de Treinamento</h2>
+
+                    <div class="form-group">
+                        <label>Job (Permissão - ex: estabulo_annesburg)</label>
+                        <input type="text" id="trainingJob" placeholder="estabulo_annesburg">
+                    </div>
+
+                    <h3 style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 1rem;">Área da Zona de
+                        Treinamento (Inside Polyzone)</h3>
+                    <div class="spawn-points">
+                        <div class="form-group">
+                            <label>Ponto 1 (vec3)</label>
+                            <input type="text" id="insideTraining1" placeholder="{2985.05, 1432.09, 45.02}">
+                        </div>
+                        <div class="form-group">
+                            <label>Ponto 2 (vec3)</label>
+                            <input type="text" id="insideTraining2" placeholder="{2994.02, 1443.33, 45.8}">
+                        </div>
+                        <div class="form-group">
+                            <label>Ponto 3 (vec3)</label>
+                            <input type="text" id="insideTraining3" placeholder="{2990.43, 1447.02, 45.53}">
+                        </div>
+                        <div class="form-group">
+                            <label>Ponto 4 (vec3)</label>
+                            <input type="text" id="insideTraining4" placeholder="{2977.43, 1442.75, 45.01}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuração do Treinamento -->
+                <div class="section">
+                    <h2 class="section-title">Configurações de Treinamento</h2>
+                    <div id="trainingsContainer">
+                        <!-- Treinamentos serão adicionados aqui via JS -->
+                    </div>
+
+                    <button class="btn-secondary" onclick="addTrainingConfig()" style="margin-top: 1rem;">
+                        <span>+ Adicionar Configuração de Treinamento</span>
+                    </button>
+                </div>
+
+                <!-- Botões -->
+                <div class="buttons">
+                    <button class="btn-primary" onclick="generateStableConfig()">
+                        <span>Gerar Configuração</span>
+                    </button>
+                    <button class="btn-secondary" id="stableDownloadBtn" onclick="downloadStableConfig()" disabled>
+                        <span>Baixar Arquivo</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
+            <span>Configurador de Estábulo v1.0</span>
+            <span>•</span>
+            <span>Desenvolvido por <strong>Rian Bispo</strong></span>
+            <span>•</span>
+            <a href="https://github.com/RianGBispo" target="_blank">GitHub</a>
+        </div>
+    </footer>
+
+    <script src="index.js"></script>
+</body>
+
+</html>

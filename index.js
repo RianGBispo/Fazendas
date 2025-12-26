@@ -163,19 +163,19 @@ function extractCoords(vecString) {
 function parseConfigFile(content) {
     try {
         const config = {};
-        
+
         // Extrair nome da organização (chave principal)
         const orgMatch = content.match(/\[['"]([^'"]+)['"]\]\s*=/);
         if (orgMatch) {
             config.orgName = orgMatch[1];
         }
-        
+
         // Extrair Label
         const labelMatch = content.match(/Label\s*=\s*['"]([^'"]+)['"]/);
         if (labelMatch) {
             config.label = labelMatch[1];
         }
-        
+
         // Extrair WorkTable Coords (pode estar em SpawnObject.Coords ou GetServiceCoords)
         let workTableMatch = content.match(/Coords\s*=\s*(vec3\([^)]+\))/);
         if (!workTableMatch) {
@@ -184,7 +184,7 @@ function parseConfigFile(content) {
         if (workTableMatch) {
             config.workTableCoords = vecToInputFormat(workTableMatch[1]);
         }
-        
+
         // Mapeamento de nomes de animais para IDs
         const animalMapping = {
             'Pig': { key: 'pig', maleId: 'pigMale', femaleId: 'pigFemale' },
@@ -195,18 +195,18 @@ function parseConfigFile(content) {
             'Chicken': { key: 'chicken', maleId: 'chickenMale', femaleId: 'chickenFemale' },
             'Buffalo': { key: 'buffalo', maleId: 'buffaloMale', femaleId: 'buffaloFemale' }
         };
-        
+
         // Extrair posições dos animais
         config.animals = {};
         const foundAnimals = [];
-        
+
         for (const [animalName, mapping] of Object.entries(animalMapping)) {
             // Buscar bloco do animal usando uma abordagem mais flexível
             // Procura por: AnimalName = { ... Positions = { { Male = vec4(...), Female = vec4(...) } } }
             // Primeiro, encontrar o início do bloco do animal
             const animalStartRegex = new RegExp(`${animalName}\\s*=\\s*\\{`, 'i');
             const animalStart = content.search(animalStartRegex);
-            
+
             if (animalStart !== -1) {
                 // Encontrar o bloco Positions dentro deste animal
                 const positionsStart = content.indexOf('Positions', animalStart);
@@ -214,7 +214,7 @@ function parseConfigFile(content) {
                     // Procurar por Male e Female dentro do bloco Positions
                     const maleMatch = content.substring(positionsStart).match(/Male\s*=\s*(vec4\([^)]+\))/);
                     const femaleMatch = content.substring(positionsStart).match(/Female\s*=\s*(vec4\([^)]+\))/);
-                    
+
                     if (maleMatch && femaleMatch) {
                         foundAnimals.push(mapping.key);
                         config.animals[mapping.key] = {
@@ -225,12 +225,12 @@ function parseConfigFile(content) {
                 }
             }
         }
-        
+
         // Determinar tier baseado nos animais encontrados
         if (foundAnimals.length === 2 && foundAnimals.includes('pig') && foundAnimals.includes('goat')) {
             config.tier = 'prata';
-        } else if (foundAnimals.length === 4 && foundAnimals.includes('pig') && foundAnimals.includes('goat') && 
-                   foundAnimals.includes('sheep') && foundAnimals.includes('donkey')) {
+        } else if (foundAnimals.length === 4 && foundAnimals.includes('pig') && foundAnimals.includes('goat') &&
+            foundAnimals.includes('sheep') && foundAnimals.includes('donkey')) {
             config.tier = 'ouro';
         } else if (foundAnimals.length === 7) {
             config.tier = 'ultimate';
@@ -244,7 +244,7 @@ function parseConfigFile(content) {
                 config.tier = 'ultimate';
             }
         }
-        
+
         return config;
     } catch (error) {
         console.error('Erro ao fazer parse do arquivo:', error);
@@ -258,21 +258,21 @@ function fillFormFields(config) {
     if (config.orgName) {
         document.getElementById('orgName').value = config.orgName;
     }
-    
+
     if (config.label) {
         document.getElementById('configLabel').value = config.label;
     }
-    
+
     if (config.workTableCoords) {
         document.getElementById('workTableCoords').value = config.workTableCoords;
     }
-    
+
     // Definir tier e atualizar campos de animais
     if (config.tier) {
         document.getElementById('nurseryType').value = config.tier;
         updateAnimalFields();
     }
-    
+
     // Preencher posições dos animais
     if (config.animals) {
         for (const [animalKey, positions] of Object.entries(config.animals)) {
@@ -285,7 +285,7 @@ function fillFormFields(config) {
                 'chicken': { maleId: 'chickenMale', femaleId: 'chickenFemale' },
                 'buffalo': { maleId: 'buffaloMale', femaleId: 'buffaloFemale' }
             };
-            
+
             const mapping = animalMapping[animalKey];
             if (mapping) {
                 if (positions.male) {
@@ -305,21 +305,21 @@ function loadConfigFile(event) {
     if (!file) {
         return;
     }
-    
+
     const reader = new FileReader();
-    
-    reader.onload = function(e) {
+
+    reader.onload = function (e) {
         try {
             const content = e.target.result;
             const config = parseConfigFile(content);
             fillFormFields(config);
-            
+
             // Mostrar mensagem de sucesso
             const fileInfo = document.getElementById('fileInfo');
             fileInfo.style.display = 'block';
             fileInfo.textContent = `✅ Arquivo "${file.name}" carregado com sucesso! Campos preenchidos.`;
             fileInfo.style.color = 'var(--success)';
-            
+
             // Limpar mensagem após 5 segundos
             setTimeout(() => {
                 fileInfo.style.display = 'none';
@@ -329,18 +329,18 @@ function loadConfigFile(event) {
             console.error(error);
         }
     };
-    
-    reader.onerror = function() {
+
+    reader.onerror = function () {
         alert('❌ Erro ao ler o arquivo. Tente novamente.');
     };
-    
+
     reader.readAsText(file);
 }
 
 // Função para garantir que todos os campos de SpawnPoints sejam editáveis
 function ensureSpawnPointsEditable() {
     const animalKeys = ['cow', 'pig', 'buffalo', 'chicken', 'sheep', 'goat', 'donkey'];
-    
+
     animalKeys.forEach(animalKey => {
         const maxSpawns = animalKey === 'donkey' ? 1 : 4;
         for (let i = 1; i <= maxSpawns; i++) {
@@ -371,12 +371,12 @@ function highlightActiveNav() {
 window.onload = function () {
     // Destacar link ativo na sidebar
     highlightActiveNav();
-    
+
     // Verificar se estamos na página de berçário
     if (document.getElementById('nurseryType')) {
         updateAnimalFields();
     }
-    
+
     // Verificar se estamos na página de organização
     if (document.getElementById('farmName')) {
         // Garantir que os campos de SpawnPoints sejam editáveis
@@ -390,18 +390,18 @@ function showPage(pageId, event) {
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
     });
-    
+
     // Mostrar página selecionada
     const targetPage = document.getElementById(`page-${pageId}`);
     if (targetPage) {
         targetPage.classList.add('active');
     }
-    
+
     // Atualizar navegação
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
     });
-    
+
     if (event) {
         const navItem = event.target.closest('.nav-item');
         if (navItem) {
@@ -417,7 +417,7 @@ function showPage(pageId, event) {
             }
         });
     }
-    
+
     // Se for a página de organização, garantir que os campos sejam editáveis
     if (pageId === 'organization') {
         setTimeout(ensureSpawnPointsEditable, 100);
@@ -443,13 +443,13 @@ function generateOrgConfig() {
         const farmName = document.getElementById('farmName').value || 'fazenda_110';
         const farmLabel = document.getElementById('farmLabel').value || 'fazenda_110';
         const pointCenter = parseCoordsOrg(document.getElementById('pointCenter').value, true);
-        
+
         const workTableSpawnCoords = parseCoordsOrg(document.getElementById('workTableSpawnCoords').value, true);
         const workTableHeading = '-39.90'; // Valor fixo
         const workTableServiceCoords = parseCoordsOrg(document.getElementById('workTableServiceCoords').value, true);
 
         const animals = [];
-        
+
         // Cow
         const cowMax = '4'; // Valor fixo
         const cowSpawns = [];
@@ -632,66 +632,66 @@ function downloadOrgConfig() {
 function parseOrgConfigFile(content) {
     try {
         const config = {};
-        
+
         // Extrair nome da fazenda (chave principal)
         const farmMatch = content.match(/\[['"]([^'"]+)['"]\]\s*=/);
         if (farmMatch) {
             config.farmName = farmMatch[1];
         }
-        
+
         // Extrair Label
         const labelMatch = content.match(/label\s*=\s*['"]([^'"]+)['"]/i);
         if (labelMatch) {
             config.label = labelMatch[1];
         }
-        
+
         // Extrair PointCenter
         const pointCenterMatch = content.match(/PointCenter\s*=\s*(vec3\([^)]+\))/);
         if (pointCenterMatch) {
             config.pointCenter = vecToInputFormat(pointCenterMatch[1]);
         }
-        
+
         // Extrair WorkTable Coords
         const workTableCoordsMatch = content.match(/Coords\s*=\s*(vec3\([^)]+\))/);
         if (workTableCoordsMatch) {
             config.workTableSpawnCoords = vecToInputFormat(workTableCoordsMatch[1]);
         }
-        
+
         // Extrair Heading
         const headingMatch = content.match(/Heading\s*=\s*([-\d.]+)/);
         if (headingMatch) {
             config.workTableHeading = headingMatch[1];
         }
-        
+
         // Extrair GetServiceCoords
         const serviceCoordsMatch = content.match(/GetServiceCoords\s*=\s*(vec3\([^)]+\))/);
         if (serviceCoordsMatch) {
             config.workTableServiceCoords = vecToInputFormat(serviceCoordsMatch[1]);
         }
-        
+
         // Extrair animais
         config.animals = {};
         const animalNames = ['Cow', 'Pig', 'Buffalo', 'Chicken', 'Sheep', 'Goat', 'Donkey'];
-        
+
         for (const animalName of animalNames) {
             const animalRegex = new RegExp(`${animalName}\\s*=\\s*\\{[\\s\\S]*?Max\\s*=\\s*(\\d+)[\\s\\S]*?SpawnPoints\\s*=\\s*\\{([\\s\\S]*?)\\}\\s*\\}`, 'i');
             const animalMatch = content.match(animalRegex);
-            
+
             if (animalMatch) {
                 const max = animalMatch[1];
                 const spawnPointsContent = animalMatch[2];
-                
+
                 // Extrair todos os vec4 do SpawnPoints
                 const vec4Regex = /vec4\([^)]+\)/g;
                 const spawnPoints = spawnPointsContent.match(vec4Regex) || [];
-                
+
                 config.animals[animalName.toLowerCase()] = {
                     max: max,
                     spawnPoints: spawnPoints.map(sp => vecToInputFormat(sp))
                 };
             }
         }
-        
+
         return config;
     } catch (error) {
         console.error('Erro ao fazer parse do arquivo:', error);
@@ -712,27 +712,27 @@ function fillOrgFormFields(config) {
             element.style.cursor = 'text';
         }
     };
-    
+
     if (config.farmName) {
         setEditableValue('farmName', config.farmName);
     }
-    
+
     if (config.label) {
         setEditableValue('farmLabel', config.label);
     }
-    
+
     if (config.pointCenter) {
         setEditableValue('pointCenter', config.pointCenter);
     }
-    
+
     if (config.workTableSpawnCoords) {
         setEditableValue('workTableSpawnCoords', config.workTableSpawnCoords);
     }
-    
+
     if (config.workTableServiceCoords) {
         setEditableValue('workTableServiceCoords', config.workTableServiceCoords);
     }
-    
+
     // Preencher animais
     if (config.animals) {
         for (const [animalKey, animalData] of Object.entries(config.animals)) {
@@ -753,21 +753,21 @@ function loadOrgConfigFile(event) {
     if (!file) {
         return;
     }
-    
+
     const reader = new FileReader();
-    
-    reader.onload = function(e) {
+
+    reader.onload = function (e) {
         try {
             const content = e.target.result;
             const config = parseOrgConfigFile(content);
             fillOrgFormFields(config);
-            
+
             // Mostrar mensagem de sucesso
             const fileInfo = document.getElementById('orgFileInfo');
             fileInfo.style.display = 'block';
             fileInfo.textContent = `✅ Arquivo "${file.name}" carregado com sucesso! Campos preenchidos.`;
             fileInfo.style.color = 'var(--success)';
-            
+
             // Limpar mensagem após 5 segundos
             setTimeout(() => {
                 fileInfo.style.display = 'none';
@@ -777,11 +777,374 @@ function loadOrgConfigFile(event) {
             console.error(error);
         }
     };
-    
-    reader.onerror = function() {
+
+    reader.onerror = function () {
         alert('❌ Erro ao ler o arquivo. Tente novamente.');
     };
-    
+
     reader.readAsText(file);
 }
+
+// ========== PÁGINA DE ESTÁBULO ==========
+let generatedStableConfig = '';
+let trainingCount = 0;
+
+// Adicionar Nova Configuração de Treinamento
+function addTrainingConfig(data = null) {
+    trainingCount++;
+    const id = trainingCount;
+    const container = document.getElementById('trainingsContainer');
+
+    const div = document.createElement('div');
+    div.className = 'training-card';
+    div.style = "background: rgba(22, 27, 34, 0.4); border: 1px solid rgba(88, 166, 255, 0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;";
+    div.id = `training-${id}`;
+
+    div.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(88, 166, 255, 0.2);">
+            <h3 style="margin: 0; color: var(--accent);">Treinamento #${id}</h3>
+            <button class="btn-secondary btn-compact" onclick="removeTraining(${id})" style="background: #d32f2f;">Remover</button>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Tipo de Treinamento</label>
+                <select id="trainingType-${id}">
+                    <option value="speed">Speed (Velocidade)</option>
+                    <option value="handling">Handling (Manuseio)</option>
+                    <option value="acceleration">Acceleration (Aceleração)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Start (Início - vec4)</label>
+                <input type="text" id="trainingStart-${id}" placeholder="{...}">
+            </div>
+        </div>
+
+        <h4 style="color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase;">Camera Preview</h4>
+        <div class="spawn-points">
+            <div class="form-group">
+                <label>Coords (vec3)</label>
+                <input type="text" id="camCoords-${id}" placeholder="{...}">
+            </div>
+            <div class="form-group">
+                <label>Rot (vec3)</label>
+                <input type="text" id="camRot-${id}" placeholder="{-7.000, 0.000, 23.60}">
+            </div>
+        </div>
+
+        <h4 style="color: var(--text-secondary); margin: 1rem 0 0.5rem; font-size: 0.9rem; text-transform: uppercase;">Checkpoints</h4>
+        <div id="checkpointsList-${id}">
+            <!-- Checkpoints dinâmicos -->
+        </div>
+        <button class="btn-secondary" onclick="addCheckpointForTraining(${id})" style="margin-top: 0.5rem; width: auto; padding: 0.5rem 1rem; font-size: 0.8rem;">+ Adicionar Checkpoint</button>
+    `;
+
+    container.appendChild(div);
+
+    // Se tiver dados para preencher
+    if (data) {
+        if (data.type) document.getElementById(`trainingType-${id}`).value = data.type;
+        if (data.start) document.getElementById(`trainingStart-${id}`).value = data.start;
+        if (data.camCoords) document.getElementById(`camCoords-${id}`).value = data.camCoords;
+        if (data.camRot) document.getElementById(`camRot-${id}`).value = data.camRot;
+
+        if (data.checkpoints && data.checkpoints.length > 0) {
+            data.checkpoints.forEach(chk => addCheckpointForTraining(id, chk));
+        }
+    } else {
+        // Inicializar com 7 checkpoints vazios por padrão
+        for (let i = 0; i < 7; i++) addCheckpointForTraining(id);
+    }
+}
+
+function removeTraining(id) {
+    document.getElementById(`training-${id}`).remove();
+}
+
+// Adicionar checkpoint específico para um treinamento
+function addCheckpointForTraining(trainingId, value = '') {
+    const list = document.getElementById(`checkpointsList-${trainingId}`);
+    const count = list.children.length + 1;
+
+    const div = document.createElement('div');
+    div.className = 'form-group';
+    div.style = "display: flex; gap: 0.5rem; align-items: flex-end;";
+    div.innerHTML = `
+        <div style="flex: 1;">
+            <label style="font-size: 0.75rem; margin-bottom: 0.25rem;">CP ${count} (vec3)</label>
+            <input type="text" class="checkpoint-input" value="${value}" placeholder="{...}">
+        </div>
+        <button class="btn-secondary btn-compact" onclick="this.parentElement.remove()" style="margin-bottom: 2px; background: #d32f2f;" title="Remover">🗑️</button>
+    `;
+    list.appendChild(div);
+}
+
+function generateStableConfig() {
+    try {
+        const id = document.getElementById('stableId').value || 'annesburg';
+        const name = document.getElementById('stableName').value || 'Treinamento Annesburg';
+        const location = parseCoordsOrg(document.getElementById('stableLocation').value);
+
+        const previewHorse = parseCoordsOrg(document.getElementById('previewHorse').value);
+        const previewMyHorse = parseCoordsOrg(document.getElementById('previewMyHorse').value);
+        const equipMyHorse = parseCoordsOrg(document.getElementById('equipMyHorse').value);
+
+        const previewWagon = parseCoordsOrg(document.getElementById('previewWagon').value);
+        const spawnWagon = parseCoordsOrg(document.getElementById('spawnWagon').value);
+
+        const storeSaddle = parseCoordsOrg(document.getElementById('storeSaddle').value);
+
+        // Inside Stable
+        const insideStable = [];
+        for (let i = 1; i <= 4; i++) {
+            const val = document.getElementById(`insideStable${i}`).value;
+            if (val) insideStable.push(`            ${parseCoordsOrg(val, true)}`);
+        }
+
+        // Training Zone (Apenas uma zona de treinamento geral, mas múltiplos circuitos)
+        const trainingJob = document.getElementById('trainingJob').value;
+        const insideTraining = [];
+        for (let i = 1; i <= 4; i++) {
+            const val = document.getElementById(`insideTraining${i}`).value;
+            if (val) insideTraining.push(`            ${parseCoordsOrg(val, true)}`);
+        }
+
+        // Processar Treinamentos (Dynamic)
+        const trainingCards = document.querySelectorAll('.training-card');
+        const trainingConfigs = [];
+
+        trainingCards.forEach(card => {
+            const tId = card.id.split('-')[1];
+            const type = document.getElementById(`trainingType-${tId}`).value;
+            const start = parseCoordsOrg(document.getElementById(`trainingStart-${tId}`).value);
+            const camCoords = parseCoordsOrg(document.getElementById(`camCoords-${tId}`).value, true);
+            const camRot = parseCoordsOrg(document.getElementById(`camRot-${tId}`).value, true);
+
+            const cps = [];
+            card.querySelectorAll('.checkpoint-input').forEach(input => {
+                if (input.value) cps.push(`      { coords = ${parseCoordsOrg(input.value, true)} }`);
+            });
+
+            trainingConfigs.push(`
+    -- Configuração do Treinamento (${type})
+    {
+        type = "${type}",
+        start = ${start},
+        camPreview = {
+            {
+                coords = ${camCoords},
+                rot = ${camRot},
+            },
+        },
+        props = {}, 
+        checkpoints = {
+${cps.join(',\n')}
+        }
+    }`);
+        });
+
+        // Construção da String Final
+        generatedStableConfig = `
+    {
+        id = "${id}", 
+        name = "${name}",
+        location = ${location},
+        pedModel = \`u_m_m_bwmstablehand_01\`,
+        blip = \`blip_shop_horse\`,                                                
+        disableHorseMenu = false,                                                
+        disableWagonMenu = false,                                                
+        horsesAvailable = { },
+        canBuyHorseComponents = true,                                            
+        previewHorse = ${previewHorse},            
+        previewMyHorse = ${previewMyHorse},          
+        equipMyHorse = ${equipMyHorse},            
+        wagonsAvailable = {},                                                    
+        previewWagon = ${previewWagon},            
+        spawnWagon = ${spawnWagon},              
+        storeSaddle = ${storeSaddle},
+        inside = {                                                               
+${insideStable.join(',\n')}
+        },
+        needInstance = true
+    },
+
+    -- Configuração da Zona de Treinamento
+    {
+        inside = {
+${insideTraining.join(',\n')}
+        },
+        blip = \`blip_horse_owned_bonding_4\`,
+        jobs = { "${trainingJob}" },
+        activities = { 'speed', 'handling', 'acceleration' }
+    },
+${trainingConfigs.join(',\n')}
+`;
+
+        document.getElementById('stableDownloadBtn').disabled = false;
+        alert('✅ Configuração de Estábulo gerada com sucesso!');
+
+    } catch (error) {
+        alert('❌ Erro ao gerar configuração. Verifique os campos.');
+        console.error(error);
+    }
+}
+
+function downloadStableConfig() {
+    if (!generatedStableConfig) {
+        alert('⚠️ Gere a configuração primeiro.');
+        return;
+    }
+    const blob = new Blob([generatedStableConfig], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const id = document.getElementById('stableId').value || 'stable';
+    a.href = url;
+    a.download = `estabulo_${id}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+}
+
+// Parse Stable Config
+function loadStableConfigFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            const content = e.target.result;
+
+            // Regex Helpers
+            const getVal = (regex) => {
+                const match = content.match(regex);
+                return match ? match[1] : '';
+            };
+            const getVec = (regex) => {
+                const match = content.match(regex);
+                return match ? vecToInputFormat(match[1] || match[0]) : '';
+            };
+
+            // Basic Info
+            const id = getVal(/id\s*=\s*"([^"]+)"/);
+            const name = getVal(/name\s*=\s*"([^"]+)"/);
+            const location = getVec(/location\s*=\s*(vec4\([^)]+\))/);
+
+            if (id) document.getElementById('stableId').value = id;
+            if (name) document.getElementById('stableName').value = name;
+            if (location) document.getElementById('stableLocation').value = location;
+
+            // Visualização e Outros
+            const previewHorse = getVec(/previewHorse\s*=\s*(vec4\([^)]+\))/);
+            const previewMyHorse = getVec(/previewMyHorse\s*=\s*(vec4\([^)]+\))/);
+            const equipMyHorse = getVec(/equipMyHorse\s*=\s*(vec4\([^)]+\))/);
+
+            if (previewHorse) document.getElementById('previewHorse').value = previewHorse;
+            if (previewMyHorse) document.getElementById('previewMyHorse').value = previewMyHorse;
+            if (equipMyHorse) document.getElementById('equipMyHorse').value = equipMyHorse;
+
+            const previewWagon = getVec(/previewWagon\s*=\s*(vec4\([^)]+\))/);
+            const spawnWagon = getVec(/spawnWagon\s*=\s*(vec4\([^)]+\))/);
+            const storeSaddle = getVec(/storeSaddle\s*=\s*(vec4\([^)]+\))/);
+
+            if (previewWagon) document.getElementById('previewWagon').value = previewWagon;
+            if (spawnWagon) document.getElementById('spawnWagon').value = spawnWagon;
+            if (storeSaddle) document.getElementById('storeSaddle').value = storeSaddle;
+
+            // Insides
+            const insideMatches = [...content.matchAll(/inside\s*=\s*\{([^}]+)\}/g)];
+            if (insideMatches.length > 0) {
+                const stableInsideVecs = insideMatches[0][1].match(/vec3\([^)]+\)/g);
+                if (stableInsideVecs) {
+                    stableInsideVecs.forEach((vec, i) => {
+                        if (i < 4) document.getElementById(`insideStable${i + 1}`).value = vecToInputFormat(vec);
+                    });
+                }
+            }
+            if (insideMatches.length > 1) {
+                const trainingInsideVecs = insideMatches[1][1].match(/vec3\([^)]+\)/g);
+                if (trainingInsideVecs) {
+                    trainingInsideVecs.forEach((vec, i) => {
+                        if (i < 4) document.getElementById(`insideTraining${i + 1}`).value = vecToInputFormat(vec);
+                    });
+                }
+            }
+
+            const job = getVal(/jobs\s*=\s*\{\s*"([^"]+)"\s*\}/);
+            if (job) document.getElementById('trainingJob').value = job;
+
+            // Parse Multiple Trainings
+            // Cada treinamento tem um type, start, camPreview, checkpoints...
+            // Vamos dar split no conteúdo pelos blocos que parecem configs de treino
+
+            // Limpar treinamentos atuais
+            document.getElementById('trainingsContainer').innerHTML = '';
+            trainingCount = 0;
+
+            // Estratégia: Encontrar todos os blocos { type = "..." ... }
+            // Regex global para capturar esses blocos pode ser complexo.
+            // Vamos tentar matchAll com algo que identifique o inicio do bloco.
+
+            const trainingRegex = /type\s*=\s*"([^"]+)"[\s\S]*?start\s*=\s*(vec4\([^)]+\))[\s\S]*?checkpoints\s*=\s*\{([\s\S]*?)\}/g;
+            const trainingMatches = [...content.matchAll(trainingRegex)];
+
+            if (trainingMatches.length > 0) {
+                trainingMatches.forEach(match => {
+                    const type = match[1];
+                    const startRaw = match[2];
+                    const checkpointsBlock = match[3];
+
+                    // Tentar achar camPreview dentro desse match ou perto?
+                    // O regex acima pega tudo até checkpoints, então camPreview deve estar no meio.
+                    // Vamos extrair do texto completo do match: match[0]
+
+                    const blockText = match[0];
+                    const camBlock = blockText.match(/camPreview\s*=\s*\{[\s\S]*?\}/);
+                    let cCoords = '', cRot = '';
+
+                    if (camBlock) {
+                        const cc = camBlock[0].match(/coords\s*=\s*(vec3\([^)]+\))/);
+                        const cr = camBlock[0].match(/rot\s*=\s*(vec3\([^)]+\))/);
+                        if (cc) cCoords = vecToInputFormat(cc[1]);
+                        if (cr) cRot = vecToInputFormat(cr[1]);
+                    }
+
+                    const cpVecs = checkpointsBlock.match(/vec3\([^)]+\)/g) || [];
+                    const checkpoints = cpVecs.map(v => vecToInputFormat(v));
+
+                    addTrainingConfig({
+                        type: type,
+                        start: vecToInputFormat(startRaw),
+                        camCoords: cCoords,
+                        camRot: cRot,
+                        checkpoints: checkpoints
+                    });
+                });
+            } else {
+                // Se não achou nenhum, adiciona um vazio
+                addTrainingConfig();
+            }
+
+            // Sucesso
+            const fileInfo = document.getElementById('stableFileInfo');
+            fileInfo.style.display = 'block';
+            fileInfo.textContent = `✅ Arquivo "${file.name}" carregado!`;
+            setTimeout(() => { fileInfo.style.display = 'none'; }, 5000);
+
+        } catch (error) {
+            alert('❌ Erro no parse: ' + error.message);
+            console.error(error);
+        }
+    };
+    reader.readAsText(file);
+}
+
+// Inicializar com um treinamento se estiver na página
+if (document.getElementById('trainingsContainer')) {
+    addTrainingConfig();
+}
+
+
 
