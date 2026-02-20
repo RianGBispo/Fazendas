@@ -513,6 +513,16 @@ function calculateCraftCost() {
 
   const totalAverage = (totalMin + totalMax) / 2;
   const craftsNeeded = Math.ceil(desiredQuantity / recipe.rendimento);
+  const totalProduced = craftsNeeded * recipe.rendimento;
+
+  const costPerCraftMin = craftsNeeded > 0 ? totalMin / craftsNeeded : 0;
+  const costPerCraftMax = craftsNeeded > 0 ? totalMax / craftsNeeded : 0;
+  const costPerCraftAverage = craftsNeeded > 0 ? totalAverage / craftsNeeded : 0;
+
+  const costPerProducedItemMin = totalProduced > 0 ? totalMin / totalProduced : 0;
+  const costPerProducedItemMax = totalProduced > 0 ? totalMax / totalProduced : 0;
+  const costPerProducedItemAverage =
+    totalProduced > 0 ? totalAverage / totalProduced : 0;
 
   const warningBlock = missingPrices.length
     ? `<div class="alert" style="margin-top: 1rem; border-color: rgba(255, 123, 114, 0.4); background: rgba(255, 123, 114, 0.1);">
@@ -525,15 +535,48 @@ function calculateCraftCost() {
   const resultEmpty = document.getElementById("resultEmpty");
 
   resultContainer.innerHTML = `
-    <div class="alert" style="margin-bottom: 1rem;">
-      <div class="alert-title">Resumo</div>
-      <p>Produto: <strong>${recipe.name}</strong> (${recipe.spawn})</p>
-      <p>Quantidade desejada: <strong>${desiredQuantity}</strong></p>
-      <p>Rendimento por craft: <strong>${recipe.rendimento}</strong></p>
-      <p>Crafts necessários: <strong>${craftsNeeded}</strong></p>
-      <p>Custo total mínimo: <strong>${formatCurrency(totalMin)}</strong></p>
-      <p>Custo total máximo: <strong>${formatCurrency(totalMax)}</strong></p>
-      <p>Custo total médio: <strong>${formatCurrency(totalAverage)}</strong></p>
+    <div class="craft-summary">
+      <div class="craft-summary-header">
+        <div>
+          <div class="craft-summary-title">Resumo do Cálculo</div>
+          <div class="craft-summary-subtitle">${recipe.name} (${recipe.spawn})</div>
+        </div>
+        <div class="craft-summary-highlight">
+          <span class="craft-summary-highlight-label">Custo unitário médio</span>
+          <strong class="craft-summary-highlight-value">${formatCurrency(costPerProducedItemAverage)}</strong>
+        </div>
+      </div>
+
+      <div class="craft-summary-grid">
+        <div class="craft-summary-card">
+          <h4>Produção</h4>
+          <div class="craft-summary-row"><span>Quantidade desejada</span><strong>${desiredQuantity}</strong></div>
+          <div class="craft-summary-row"><span>Rendimento por craft</span><strong>${recipe.rendimento}</strong></div>
+          <div class="craft-summary-row"><span>Crafts necessários</span><strong>${craftsNeeded}</strong></div>
+          <div class="craft-summary-row"><span>Total produzido</span><strong>${totalProduced}</strong></div>
+        </div>
+
+        <div class="craft-summary-card">
+          <h4>Custos Totais</h4>
+          <div class="craft-summary-row"><span>Mínimo</span><strong>${formatCurrency(totalMin)}</strong></div>
+          <div class="craft-summary-row"><span>Máximo</span><strong>${formatCurrency(totalMax)}</strong></div>
+          <div class="craft-summary-row"><span>Médio</span><strong>${formatCurrency(totalAverage)}</strong></div>
+        </div>
+
+        <div class="craft-summary-card">
+          <h4>Custo por Craft</h4>
+          <div class="craft-summary-row"><span>Mínimo</span><strong>${formatCurrency(costPerCraftMin)}</strong></div>
+          <div class="craft-summary-row"><span>Máximo</span><strong>${formatCurrency(costPerCraftMax)}</strong></div>
+          <div class="craft-summary-row"><span>Médio</span><strong>${formatCurrency(costPerCraftAverage)}</strong></div>
+        </div>
+
+        <div class="craft-summary-card">
+          <h4>Custo por Item</h4>
+          <div class="craft-summary-row"><span>Mínimo</span><strong>${formatCurrency(costPerProducedItemMin)}</strong></div>
+          <div class="craft-summary-row"><span>Máximo</span><strong>${formatCurrency(costPerProducedItemMax)}</strong></div>
+          <div class="craft-summary-row"><span>Médio</span><strong>${formatCurrency(costPerProducedItemAverage)}</strong></div>
+        </div>
+      </div>
     </div>
 
     <div style="overflow-x: auto;">

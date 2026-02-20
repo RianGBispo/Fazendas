@@ -756,6 +756,88 @@ input[type="number"]:focus {
     background: rgba(33, 38, 45, 1);
 }
 
+.craft-summary {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid rgba(88, 166, 255, 0.25);
+    border-radius: 12px;
+    background: rgba(22, 27, 34, 0.55);
+}
+
+.craft-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(88, 166, 255, 0.2);
+}
+
+.craft-summary-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.craft-summary-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.craft-summary-highlight {
+    text-align: right;
+}
+
+.craft-summary-highlight-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+}
+
+.craft-summary-highlight-value {
+    font-size: 1.2rem;
+    color: var(--success);
+}
+
+.craft-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem;
+}
+
+.craft-summary-card {
+    background: rgba(13, 17, 23, 0.55);
+    border: 1px solid rgba(88, 166, 255, 0.2);
+    border-radius: 10px;
+    padding: 0.85rem;
+}
+
+.craft-summary-card h4 {
+    margin: 0 0 0.65rem;
+    font-size: 0.82rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.craft-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.25rem 0;
+    font-size: 0.87rem;
+    color: var(--text-secondary);
+}
+
+.craft-summary-row strong {
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+}
+
 @media (max-width: 768px) {
     .main-layout {
         flex-direction: column;
@@ -801,6 +883,15 @@ input[type="number"]:focus {
 
     .buttons {
         flex-direction: column;
+    }
+
+    .craft-summary-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .craft-summary-highlight {
+        text-align: left;
     }
 
     .section {
