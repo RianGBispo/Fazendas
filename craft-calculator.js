@@ -1,5 +1,6 @@
 let recipesBySpawn = new Map();
 let pricesByProduct = new Map();
+let manualIngredientCounter = 0;
 const CRAFT_DEBUG = true;
 
 function debugLog(...args) {
@@ -240,12 +241,17 @@ function parseCraftConfig(content) {
     const ingredientEntryRegex = /\['([^']+)'\]\s*=\s*\{([\s\S]*?)\}/g;
 
     let ingredientEntryMatch;
-    while ((ingredientEntryMatch = ingredientEntryRegex.exec(ingredientsBlock)) !== null) {
+    while (
+      (ingredientEntryMatch = ingredientEntryRegex.exec(ingredientsBlock)) !==
+      null
+    ) {
       const ingredientSpawn = String(ingredientEntryMatch[1] || "").trim();
       const ingredientBody = String(ingredientEntryMatch[2] || "");
 
       const nameMatch = ingredientBody.match(/name\s*=\s*['\"]([^'\"]*)['\"]/i);
-      const quantityMatch = ingredientBody.match(/quantity\s*=\s*([0-9]+(?:\.[0-9]+)?)/i);
+      const quantityMatch = ingredientBody.match(
+        /quantity\s*=\s*([0-9]+(?:\.[0-9]+)?)/i,
+      );
 
       const ingredientName = String(
         (nameMatch && nameMatch[1]) || ingredientSpawn,
@@ -297,8 +303,51 @@ function parseCraftConfig(content) {
 function updateCraftPreview() {
   const selectedCraftItems = document.getElementById("selectedCraftItems");
   const productSelect = document.getElementById("productSelect");
+  const useManualCraft = document.getElementById("useManualCraft");
 
-  if (!selectedCraftItems || !productSelect) {
+  if (!selectedCraftItems || !productSelect || !useManualCraft) {
+    return;
+  }
+
+  if (useManualCraft.checked) {
+    const manualSpawn = String(
+      document.getElementById("manualCraftSpawn")?.value || "",
+    ).trim();
+    const manualName = String(
+      document.getElementById("manualCraftName")?.value || "",
+    ).trim();
+    const manualYield = Number(
+      document.getElementById("manualCraftYield")?.value || 1,
+    );
+
+    const ingredientRows = document.querySelectorAll(".manual-ingredient-row");
+    const ingredientLines = [];
+    ingredientRows.forEach((row) => {
+      const rowId = row.dataset.rowId;
+      const ingSpawn = String(
+        document.getElementById(`manualIngSpawn-${rowId}`)?.value || "",
+      ).trim();
+      const ingName = String(
+        document.getElementById(`manualIngName-${rowId}`)?.value || "",
+      ).trim();
+      const ingQty = Number(
+        document.getElementById(`manualIngQty-${rowId}`)?.value || 0,
+      );
+
+      if (ingSpawn && ingQty > 0) {
+        ingredientLines.push(
+          `• ${ingName || ingSpawn} (${ingSpawn}) x${ingQty}`,
+        );
+      }
+    });
+
+    selectedCraftItems.innerHTML = `
+      <div class="alert-title">Itens do Craft em Criação</div>
+      <p><strong>${manualName || "(sem nome)"}</strong> (${manualSpawn || "sem spawn"})</p>
+      <p>Rendimento por craft: <strong>${manualYield > 0 ? manualYield : 1}</strong></p>
+      <p>${ingredientLines.length ? ingredientLines.join("<br>") : "• Adicione ingredientes para calcular."}</p>
+    `;
+    selectedCraftItems.style.display = "block";
     return;
   }
 
@@ -312,7 +361,10 @@ function updateCraftPreview() {
   const recipe = recipesBySpawn.get(selectedKey);
   const ingredientLines = recipe.ingredients.length
     ? recipe.ingredients
-        .map((ingredient) => `• ${ingredient.name} (${ingredient.spawn}) x${ingredient.quantity}`)
+        .map(
+          (ingredient) =>
+            `• ${ingredient.name} (${ingredient.spawn}) x${ingredient.quantity}`,
+        )
         .join("<br>")
     : "• Este craft não possui ingredientes cadastrados.";
 
@@ -323,6 +375,206 @@ function updateCraftPreview() {
     <p>${ingredientLines}</p>
   `;
   selectedCraftItems.style.display = "block";
+}
+
+function setManualModeUI(isEnabled) {
+  const manualCraftSection = document.getElementById("manualCraftSection");
+  const productSearch = document.getElementById("productSearch");
+  const productSelect = document.getElementById("productSelect");
+  const manualCraftAdvanced = document.getElementById("manualCraftAdvanced");
+
+  if (
+    !manualCraftSection ||
+    !productSearch ||
+    !productSelect ||
+    !manualCraftAdvanced
+  ) {
+    return;
+  }
+
+  if (isEnabled) {
+    manualCraftAdvanced.open = true;
+  }
+
+  manualCraftSection.style.display = isEnabled ? "block" : "none";
+  productSearch.disabled = isEnabled;
+  productSelect.disabled = isEnabled;
+  productSearch.style.opacity = isEnabled ? "0.65" : "1";
+  productSelect.style.opacity = isEnabled ? "0.65" : "1";
+  updateCraftPreview();
+}
+
+function addManualIngredientRow(data = null) {
+  manualIngredientCounter++;
+  const rowId = manualIngredientCounter;
+  const container = document.getElementById("manualIngredientsList");
+  if (!container) {
+    return;
+  }
+
+  const row = document.createElement("div");
+  row.className = "form-row manual-ingredient-row";
+  row.dataset.rowId = String(rowId);
+  row.style =
+    "margin-bottom: 0.5rem; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 8px;";
+
+  row.innerHTML = `
+    <div class="form-group" style="flex: 1;">
+      <label>Spawn do Ingrediente</label>
+      <input type="text" id="manualIngSpawn-${rowId}" placeholder="ferro" value="${data && data.spawn ? data.spawn : ""}">
+    </div>
+    <div class="form-group" style="flex: 1;">
+      <label>Nome do Ingrediente</label>
+      <input type="text" id="manualIngName-${rowId}" placeholder="Ferro" value="${data && data.name ? data.name : ""}">
+    </div>
+    <div class="form-group" style="flex: 0.5;">
+      <label>Quantidade</label>
+      <input type="number" id="manualIngQty-${rowId}" min="1" value="${data && data.quantity ? data.quantity : 1}">
+    </div>
+    <div class="form-group" style="flex: 0;">
+      <label style="visibility: hidden;">-</label>
+      <button class="btn-secondary btn-compact" type="button" onclick="removeManualIngredientRow(${rowId})" style="background: #d32f2f;">X</button>
+    </div>
+  `;
+
+  container.appendChild(row);
+}
+
+function removeManualIngredientRow(rowId) {
+  const row = document.querySelector(
+    `.manual-ingredient-row[data-row-id="${rowId}"]`,
+  );
+  if (row) {
+    row.remove();
+    updateCraftPreview();
+  }
+}
+
+function buildManualRecipeFromForm() {
+  const manualCraftSpawn = String(
+    document.getElementById("manualCraftSpawn")?.value || "",
+  ).trim();
+  const manualCraftName = String(
+    document.getElementById("manualCraftName")?.value || "",
+  ).trim();
+  const manualCraftYield = Number(
+    document.getElementById("manualCraftYield")?.value || 1,
+  );
+
+  if (!manualCraftSpawn) {
+    alert("⚠️ Informe o spawn do craft em criação.");
+    return null;
+  }
+
+  if (!manualCraftName) {
+    alert("⚠️ Informe o nome do craft em criação.");
+    return null;
+  }
+
+  if (!Number.isFinite(manualCraftYield) || manualCraftYield <= 0) {
+    alert("⚠️ Informe um rendimento válido para o craft em criação.");
+    return null;
+  }
+
+  const ingredients = [];
+  const ingredientRows = document.querySelectorAll(".manual-ingredient-row");
+
+  ingredientRows.forEach((row) => {
+    const rowId = row.dataset.rowId;
+    const spawn = String(
+      document.getElementById(`manualIngSpawn-${rowId}`)?.value || "",
+    ).trim();
+    const name = String(
+      document.getElementById(`manualIngName-${rowId}`)?.value || "",
+    ).trim();
+    const quantity = Number(
+      document.getElementById(`manualIngQty-${rowId}`)?.value || 0,
+    );
+
+    if (spawn && Number.isFinite(quantity) && quantity > 0) {
+      ingredients.push({
+        spawn,
+        name: name || spawn,
+        quantity,
+      });
+    }
+  });
+
+  if (!ingredients.length) {
+    alert("⚠️ Adicione pelo menos um ingrediente válido no craft em criação.");
+    return null;
+  }
+
+  return {
+    spawn: manualCraftSpawn,
+    name: manualCraftName,
+    rendimento: manualCraftYield,
+    ingredients,
+  };
+}
+
+function addOrAccumulateBaseItem(baseItems, itemKey, itemMeta, quantity) {
+  const existing = baseItems.get(itemKey) || {
+    spawn: (itemMeta && itemMeta.spawn) || itemKey,
+    name:
+      (itemMeta && (itemMeta.name || itemMeta.spawn)) ||
+      (itemMeta && itemMeta.spawn) ||
+      itemKey,
+    quantity: 0,
+  };
+
+  if (itemMeta && itemMeta.name && existing.name === existing.spawn) {
+    existing.name = itemMeta.name;
+  }
+
+  existing.quantity += quantity;
+  baseItems.set(itemKey, existing);
+}
+
+function expandRecipeIngredients(
+  recipe,
+  quantityNeeded,
+  baseItems,
+  path = [],
+  recipeKeyHint = "",
+) {
+  const currentRecipeKey = normalizeKey(
+    recipe.spawn || recipe.name || recipeKeyHint || "manual_root",
+  );
+
+  if (path.includes(currentRecipeKey)) {
+    throw new Error(
+      `Dependência cíclica detectada: ${[...path, currentRecipeKey].join(" -> ")}`,
+    );
+  }
+
+  const craftsNeeded = Math.ceil(quantityNeeded / recipe.rendimento);
+  recipe.ingredients.forEach((ingredient) => {
+    const ingredientKey = normalizeKey(ingredient.spawn);
+    const totalIngredientQuantity = ingredient.quantity * craftsNeeded;
+
+    const nestedRecipe = recipesBySpawn.get(ingredientKey);
+    if (nestedRecipe) {
+      expandRecipeIngredients(
+        nestedRecipe,
+        totalIngredientQuantity,
+        baseItems,
+        [...path, currentRecipeKey],
+        ingredientKey,
+      );
+      return;
+    }
+
+    addOrAccumulateBaseItem(
+      baseItems,
+      ingredientKey,
+      {
+        spawn: ingredient.spawn,
+        name: ingredient.name,
+      },
+      totalIngredientQuantity,
+    );
+  });
 }
 
 function updateProductSelect(searchTerm = "") {
@@ -352,9 +604,7 @@ function updateProductSelect(searchTerm = "") {
       const bySpawn = normalizeKey(recipe.spawn).includes(normalizedSearch);
       return byName || bySpawn;
     })
-    .sort((a, b) =>
-    a.name.localeCompare(b.name, "pt-BR"),
-  );
+    .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 
   if (!recipes.length) {
     const emptySearchOption = document.createElement("option");
@@ -441,11 +691,6 @@ function resolvePriceForItem(item) {
 }
 
 function calculateCraftCost() {
-  if (!recipesBySpawn.size) {
-    alert("⚠️ Carregue primeiro o arquivo de crafts.");
-    return;
-  }
-
   if (!pricesByProduct.size) {
     alert("⚠️ Carregue primeiro a planilha de custos.");
     return;
@@ -453,13 +698,29 @@ function calculateCraftCost() {
 
   const productSelect = document.getElementById("productSelect");
   const desiredQuantityInput = document.getElementById("desiredQuantity");
+  const useManualCraft = document.getElementById("useManualCraft");
 
-  const selectedKey = normalizeKey(productSelect.value);
   const desiredQuantity = Number(desiredQuantityInput.value);
+  const isManual = Boolean(useManualCraft && useManualCraft.checked);
+  let recipe = null;
 
-  if (!selectedKey || !recipesBySpawn.has(selectedKey)) {
-    alert("⚠️ Selecione um produto válido.");
+  if (!isManual && !recipesBySpawn.size) {
+    alert("⚠️ Carregue primeiro o arquivo de crafts.");
     return;
+  }
+
+  if (isManual) {
+    recipe = buildManualRecipeFromForm();
+    if (!recipe) {
+      return;
+    }
+  } else {
+    const selectedKey = normalizeKey(productSelect.value);
+    if (!selectedKey || !recipesBySpawn.has(selectedKey)) {
+      alert("⚠️ Selecione um produto válido.");
+      return;
+    }
+    recipe = recipesBySpawn.get(selectedKey);
   }
 
   if (!Number.isFinite(desiredQuantity) || desiredQuantity <= 0) {
@@ -467,11 +728,16 @@ function calculateCraftCost() {
     return;
   }
 
-  const recipe = recipesBySpawn.get(selectedKey);
   const baseItems = new Map();
 
   try {
-    expandIngredients(selectedKey, desiredQuantity, baseItems);
+    expandRecipeIngredients(
+      recipe,
+      desiredQuantity,
+      baseItems,
+      [],
+      recipe.spawn,
+    );
   } catch (error) {
     alert(`❌ ${error.message}`);
     return;
@@ -517,10 +783,13 @@ function calculateCraftCost() {
 
   const costPerCraftMin = craftsNeeded > 0 ? totalMin / craftsNeeded : 0;
   const costPerCraftMax = craftsNeeded > 0 ? totalMax / craftsNeeded : 0;
-  const costPerCraftAverage = craftsNeeded > 0 ? totalAverage / craftsNeeded : 0;
+  const costPerCraftAverage =
+    craftsNeeded > 0 ? totalAverage / craftsNeeded : 0;
 
-  const costPerProducedItemMin = totalProduced > 0 ? totalMin / totalProduced : 0;
-  const costPerProducedItemMax = totalProduced > 0 ? totalMax / totalProduced : 0;
+  const costPerProducedItemMin =
+    totalProduced > 0 ? totalMin / totalProduced : 0;
+  const costPerProducedItemMax =
+    totalProduced > 0 ? totalMax / totalProduced : 0;
   const costPerProducedItemAverage =
     totalProduced > 0 ? totalAverage / totalProduced : 0;
 
@@ -695,6 +964,11 @@ function registerEvents() {
   const calculateCraftBtn = document.getElementById("calculateCraftBtn");
   const productSearch = document.getElementById("productSearch");
   const productSelect = document.getElementById("productSelect");
+  const useManualCraft = document.getElementById("useManualCraft");
+  const addManualIngredientBtn = document.getElementById(
+    "addManualIngredientBtn",
+  );
+  const manualCraftSection = document.getElementById("manualCraftSection");
 
   craftConfigInput.addEventListener("change", (event) => {
     const file = event.target.files[0];
@@ -710,6 +984,19 @@ function registerEvents() {
   });
 
   productSelect.addEventListener("change", () => {
+    updateCraftPreview();
+  });
+
+  useManualCraft.addEventListener("change", (event) => {
+    setManualModeUI(Boolean(event.target.checked));
+  });
+
+  addManualIngredientBtn.addEventListener("click", () => {
+    addManualIngredientRow();
+    updateCraftPreview();
+  });
+
+  manualCraftSection.addEventListener("input", () => {
     updateCraftPreview();
   });
 
@@ -749,6 +1036,10 @@ function registerEvents() {
   });
 
   calculateCraftBtn.addEventListener("click", calculateCraftCost);
+
+  addManualIngredientRow();
+  addManualIngredientRow();
+  setManualModeUI(false);
 }
 
 registerEvents();
