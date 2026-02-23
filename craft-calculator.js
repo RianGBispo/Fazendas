@@ -2,6 +2,8 @@ let recipesBySpawn = new Map();
 let pricesByProduct = new Map();
 let manualIngredientCounter = 0;
 const CRAFT_DEBUG = true;
+const DEFAULT_PRICE_SHEET_URL =
+  "https://docs.google.com/spreadsheets/d/109TKx1gsQ0hHWyP3Qs4PquHKfoslCTd6SNB3YFT2TdI/edit?gid=0";
 
 function debugLog(...args) {
   if (CRAFT_DEBUG) {
@@ -1002,11 +1004,11 @@ function registerEvents() {
 
   loadPriceFromUrlBtn.addEventListener("click", async () => {
     const urlInput = document.getElementById("priceCsvUrl");
-    const url = String(urlInput.value || "").trim();
+    const typedUrl = String(urlInput.value || "").trim();
+    const url = typedUrl || DEFAULT_PRICE_SHEET_URL;
 
-    if (!url) {
-      alert("⚠️ Informe o link da planilha de custos.");
-      return;
+    if (!typedUrl) {
+      urlInput.value = DEFAULT_PRICE_SHEET_URL;
     }
 
     const csvUrl = getGoogleSheetCsvUrl(url);
