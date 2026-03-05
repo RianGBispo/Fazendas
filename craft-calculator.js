@@ -539,15 +539,28 @@ function expandRecipeIngredients(
   baseItems,
   path = [],
   recipeKeyHint = "",
+  cycleWarnings = null,
 ) {
   const currentRecipeKey = normalizeKey(
     recipe.spawn || recipe.name || recipeKeyHint || "manual_root",
   );
 
   if (path.includes(currentRecipeKey)) {
-    throw new Error(
-      `Dependência cíclica detectada: ${[...path, currentRecipeKey].join(" -> ")}`,
+    const cyclePath = [...path, currentRecipeKey].join(" -> ");
+    if (cycleWarnings && typeof cycleWarnings.add === "function") {
+      cycleWarnings.add(cyclePath);
+    }
+
+    addOrAccumulateBaseItem(
+      baseItems,
+      currentRecipeKey,
+      {
+        spawn: recipe.spawn || currentRecipeKey,
+        name: recipe.name || recipe.spawn || currentRecipeKey,
+      },
+      quantityNeeded,
     );
+    return;
   }
 
   const craftsNeeded = Math.ceil(quantityNeeded / recipe.rendimento);
@@ -563,6 +576,7 @@ function expandRecipeIngredients(
         baseItems,
         [...path, currentRecipeKey],
         ingredientKey,
+        cycleWarnings,
       );
       return;
     }
@@ -731,6 +745,7 @@ function calculateCraftCost() {
   }
 
   const baseItems = new Map();
+  const cycleWarnings = new Set();
 
   try {
     expandRecipeIngredients(
@@ -739,6 +754,7 @@ function calculateCraftCost() {
       baseItems,
       [],
       recipe.spawn,
+      cycleWarnings,
     );
   } catch (error) {
     alert(`❌ ${error.message}`);
@@ -795,12 +811,28 @@ function calculateCraftCost() {
   const costPerProducedItemAverage =
     totalProduced > 0 ? totalAverage / totalProduced : 0;
 
-  const warningBlock = missingPrices.length
-    ? `<div class="alert" style="margin-top: 1rem; border-color: rgba(255, 123, 114, 0.4); background: rgba(255, 123, 114, 0.1);">
-         <div class="alert-title" style="color: #ff7b72;">⚠️ Preço não encontrado para:</div>
-         <p>${missingPrices.join(", ")}</p>
-       </div>`
-    : "";
+  const warningMessages = [];
+
+  if (missingPrices.length) {
+    warningMessages.push(`
+      <div class="alert" style="margin-top: 1rem; border-color: rgba(255, 123, 114, 0.4); background: rgba(255, 123, 114, 0.1);">
+        <div class="alert-title" style="color: #ff7b72;">⚠️ Preço não encontrado para:</div>
+        <p>${missingPrices.join(", ")}</p>
+      </div>
+    `);
+  }
+
+  if (cycleWarnings.size) {
+    warningMessages.push(`
+      <div class="alert" style="margin-top: 1rem; border-color: rgba(255, 166, 87, 0.45); background: rgba(255, 166, 87, 0.12);">
+        <div class="alert-title" style="color: #ffb86b;">⚠️ Dependência cíclica detectada</div>
+        <p>Alguns itens possuem loop de receitas e foram tratados como item base para o cálculo continuar.</p>
+        <p>${Array.from(cycleWarnings).join("<br>")}</p>
+      </div>
+    `);
+  }
+
+  const warningBlock = warningMessages.join("");
 
   const resultContainer = document.getElementById("resultContainer");
   const resultEmpty = document.getElementById("resultEmpty");
